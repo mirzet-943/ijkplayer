@@ -39,39 +39,44 @@ jobs:
       - name: Set NDK Environment Variables
         run: |
           echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/ndk-r10e" >> $GITHUB_ENV
-          echo "ANDROID_NDK=$ANDROID_HOME/ndk/ndk-r10e" >> $GITHUB_ENV
-          echo "NDK_HOME=$ANDROID_HOME/ndk/ndk-r10e" >> $GITHUB_ENV
           echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/ndk-r10e" >> $GITHUB_ENV
-          echo "PATH=$ANDROID_HOME/ndk/ndk-r10e:$PATH" >> $GITHUB_ENV
+          echo "NDK_ROOT=$ANDROID_HOME/ndk/ndk-r10e" >> $GITHUB_ENV
+          echo "NDK_HOME=$ANDROID_HOME/ndk/ndk-r10e" >> $GITHUB_ENV
           echo "NDK=$ANDROID_HOME/ndk/ndk-r10e" >> $GITHUB_ENV
+          echo "PATH=$ANDROID_HOME/ndk/ndk-r10e:$PATH" >> $GITHUB_ENV
 
       - name: Verify NDK Version
         run: $ANDROID_HOME/ndk/ndk-r10e/ndk-build --version
 
-      - name: Initialize submodules
+      - name: Set System Variable for NDK
+        run: |
+          sudo ln -sf $ANDROID_HOME/ndk/ndk-r10e/toolchains/llvm/prebuilt/linux-x86_64 /usr/local/lib/android/sdk/ndk/ndk-r10e
+          echo "System NDK path set for compatibility."
+
+      - name: Initialize Submodules
         run: git submodule update --init --recursive
 
       - name: Initialize Android Environment
+        shell: bash
         env:
           ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
-          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
-        run: bash ./init-android.sh
+        run: ./init-android.sh
 
       - name: Build FFmpeg
+        shell: bash
         env:
           ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
-          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
-          NDK_HOME: ${{ env.NDK_HOME }}
+          NDK_ROOT: ${{ env.NDK_ROOT }}
         run: |
           cd android/contrib
-          bash ./compile-ffmpeg.sh clean
-          bash ./compile-ffmpeg.sh all
+          ./compile-ffmpeg.sh clean
+          ./compile-ffmpeg.sh all --system=linux-x86_64
 
       - name: Build AAR
+        shell: bash
         env:
           ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
-          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
-          NDK_HOME: ${{ env.NDK_HOME }}
+          NDK_ROOT: ${{ env.NDK_ROOT }}
         run: |
           cd ../../android
           ./gradlew clean assembleRelease
