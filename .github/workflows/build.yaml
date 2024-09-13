@@ -45,12 +45,11 @@ jobs:
           echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/ndk-r10e" >> $GITHUB_ENV
           echo "NDK_HOME=$ANDROID_HOME/ndk/ndk-r10e" >> $GITHUB_ENV
           echo "NDK_ROOT=$ANDROID_HOME/ndk/ndk-r10e" >> $GITHUB_ENV
-          echo "PATH=$ANDROID_HOME/ndk/ndk-r10e:$ANDROID_HOME/ndk/ndk-r10e/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" >> $GITHUB_ENV
+          echo "PATH=$ANDROID_HOME/ndk/ndk-r10e:$ANDROID_HOME/ndk/ndk-r10e/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$ANDROID_HOME/ndk/ndk-r10e/toolchains/x86-4.9/prebuilt/linux-x86_64/bin:$PATH" >> $GITHUB_ENV
 
       - name: Verify NDK Installation and Paths
         run: |
           ls -la $ANDROID_HOME/ndk/ndk-r10e
-          ls -la $ANDROID_HOME/ndk/ndk-r10e/toolchains/llvm/prebuilt/linux-x86_64/bin
           echo "NDK setup completed."
 
       - name: Remove Conflicting NDK Versions
@@ -80,7 +79,7 @@ jobs:
         run: |
           cd android/contrib
           ./compile-ffmpeg.sh clean
-          ./compile-ffmpeg.sh all --system=linux-x86_64
+          ./compile-ffmpeg.sh all
 
       - name: Build AAR
         shell: bash
