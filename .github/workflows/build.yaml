@@ -3,10 +3,10 @@ name: Build IJKPlayer AAR
 on:
   push:
     branches:
-      - latest
+      - main
   pull_request:
     branches:
-      - latest
+      - main
 
 jobs:
   build:
@@ -28,6 +28,16 @@ jobs:
           api-level: 30
           build-tools: 30.0.3
 
+      - name: Download NDK r10e
+        run: |
+          mkdir -p $ANDROID_HOME/ndk
+          wget https://dl.google.com/android/repository/android-ndk-r10e-linux-x86_64.zip -O ndk-r10e.zip
+          unzip ndk-r10e.zip -d $ANDROID_HOME/ndk
+          echo "NDK r10e installed."
+
+      - name: Set NDK path
+        run: echo "NDK_HOME=$ANDROID_HOME/ndk/android-ndk-r10e" >> $GITHUB_ENV
+
       - name: Initialize submodules
         run: git submodule update --init --recursive
 
@@ -35,12 +45,16 @@ jobs:
         run: ./init-android.sh
 
       - name: Build FFmpeg
+        env:
+          NDK_HOME: ${{ env.NDK_HOME }}
         run: |
           cd android/contrib
           ./compile-ffmpeg.sh clean
           ./compile-ffmpeg.sh all
 
       - name: Build AAR
+        env:
+          NDK_HOME: ${{ env.NDK_HOME }}
         run: |
           cd ../../android
           ./gradlew clean assembleRelease
