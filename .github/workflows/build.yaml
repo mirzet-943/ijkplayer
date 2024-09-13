@@ -3,10 +3,10 @@ name: Build IJKPlayer AAR
 on:
   push:
     branches:
-      - main
+      - latest
   pull_request:
     branches:
-      - main
+      - latest
 
 jobs:
   build:
