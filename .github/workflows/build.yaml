@@ -33,19 +33,31 @@ jobs:
           mkdir -p $ANDROID_HOME/ndk
           wget https://dl.google.com/android/repository/android-ndk-r10e-linux-x86_64.zip -O ndk-r10e.zip
           unzip ndk-r10e.zip -d $ANDROID_HOME/ndk
+          mv $ANDROID_HOME/ndk/android-ndk-r10e $ANDROID_HOME/ndk/ndk-r10e
           echo "NDK r10e installed."
 
-      - name: Set NDK path
-        run: echo "NDK_HOME=$ANDROID_HOME/ndk/android-ndk-r10e" >> $GITHUB_ENV
+      - name: Set NDK environment variables
+        run: |
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/ndk-r10e" >> $GITHUB_ENV
+          echo "ANDROID_NDK=$ANDROID_HOME/ndk/ndk-r10e" >> $GITHUB_ENV
+          echo "NDK_HOME=$ANDROID_HOME/ndk/ndk-r10e" >> $GITHUB_ENV
+          echo "PATH=$ANDROID_HOME/ndk/ndk-r10e:$PATH" >> $GITHUB_ENV
+          echo "NDK=$ANDROID_HOME/ndk/ndk-r10e" >> $GITHUB_ENV
+
+      - name: Verify NDK Version
+        run: $ANDROID_HOME/ndk/ndk-r10e/ndk-build --version
 
       - name: Initialize submodules
         run: git submodule update --init --recursive
 
       - name: Initialize Android environment
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
         run: ./init-android.sh
 
       - name: Build FFmpeg
         env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
           NDK_HOME: ${{ env.NDK_HOME }}
         run: |
           cd android/contrib
@@ -54,6 +66,7 @@ jobs:
 
       - name: Build AAR
         env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
           NDK_HOME: ${{ env.NDK_HOME }}
         run: |
           cd ../../android
